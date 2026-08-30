@@ -409,6 +409,14 @@ input[type="file"].fi-file {
   text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
 }
 .btn-cetak:hover { border-color: #7c3aed; color: #7c3aed; }
+.btn-nilai {
+  padding: 11px 16px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border); background: var(--surface);
+  font-size: 13px; font-weight: 700; color: var(--text); cursor: pointer; transition: .15s;
+  white-space: nowrap; font-family: var(--font);
+  text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+}
+.btn-nilai:hover { border-color: var(--success); color: var(--success); }
 .btn-clear-local {
   padding: 11px 14px; border-radius: var(--radius-sm);
   border: 1.5px solid var(--border); background: var(--surface);
@@ -565,6 +573,7 @@ input[type="file"].fi-file {
     </div>
     <div class="bar-actions">
       <a class="btn-cetak" href="https://castp6980-eng.github.io/penampil_soal_ujian/" target="_blank" rel="noopener noreferrer">🖨 Cetak Soal</a>
+      <a class="btn-nilai" href="https://castp6980-eng.github.io/cek_nilai_semua/" target="_blank" rel="noopener noreferrer">📊 Cek Nilai</a>
       <button class="btn-preview"     onclick="showPreviewModal()">👁 Preview</button>
       <button class="btn-clear-local" onclick="confirmClearLocal()">🗑 Bersihkan</button>
       <button class="btn-kirim" id="btnKirim" onclick="kirimSemuaData()">Kirim ke Server →</button>
@@ -918,7 +927,6 @@ function renderOpsi(wrapperEl, jml, savedPilihan, cardId) {
     var fileId = 'mfile-' + cardId + '-' + L;
     var wrap   = document.createElement('div');
 
-    /* ★ FIX: gunakan data-wrapid attribute untuk menghindari quote-inside-string */
     wrap.innerHTML =
       '<div class="option-row">' +
         '<div class="opt-label">' + L + '</div>' +
@@ -970,7 +978,6 @@ function handleFileOpsi(inputEl) {
   reader.onload = function(e) {
     inputEl.dataset.b64 = e.target.result;
 
-    /* ★ FIX: simpan referensi wrapId di data attribute, bukan di string onclick */
     var optionRow = inputEl.closest('.option-row');
     var wrapId    = 'opt-prev-' + inputEl.id;
     var prev      = document.getElementById(wrapId);
@@ -985,7 +992,7 @@ function handleFileOpsi(inputEl) {
 
       var delBtn = document.createElement('button');
       delBtn.type      = 'button';
-      delBtn.dataset.wrapid = wrapId;  /* simpan id di data attr */
+      delBtn.dataset.wrapid = wrapId;
       delBtn.style.cssText  =
         'font-size:11px;color:var(--danger);background:var(--danger-soft);' +
         'border:1px solid var(--danger);border-radius:6px;padding:3px 8px;' +
@@ -1005,7 +1012,6 @@ function handleFileOpsi(inputEl) {
   reader.readAsDataURL(file);
 }
 
-/* ★ FIX: fungsi hapusGambarOpsi hanya butuh wrapId (tidak perlu btn arg) */
 function hapusGambarOpsi(wrapId) {
   var prev = document.getElementById(wrapId);
   if (!prev) return;
@@ -1019,7 +1025,6 @@ function hapusGambarOpsi(wrapId) {
   triggerLocalSave();
 }
 
-/* ★ FIX: restoreImagePreview menggunakan createElement (bukan innerHTML dengan kutip bertingkat) */
 function restoreImagePreview(card, item) {
   if (item.gambarSoal) {
     var fileEl = card.querySelector('.fileSoal');
