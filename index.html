@@ -389,10 +389,11 @@ input[type="file"].fi-file {
 .sticky-inner {
   max-width: 860px; margin: 0 auto;
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  flex-wrap: wrap;
 }
 .count-info { font-size: 13px; color: var(--muted); flex-shrink: 0; }
 .count-info strong { color: var(--accent); font-size: 22px; font-weight: 900; }
-.bar-actions { display: flex; gap: 8px; flex: 1; justify-content: flex-end; }
+.bar-actions { display: flex; gap: 8px; flex: 1; justify-content: flex-end; flex-wrap: wrap; }
 .btn-preview {
   padding: 11px 16px; border-radius: var(--radius-sm);
   border: 1.5px solid var(--border); background: var(--surface);
@@ -400,6 +401,14 @@ input[type="file"].fi-file {
   white-space: nowrap; font-family: var(--font);
 }
 .btn-preview:hover { border-color: var(--accent); color: var(--accent); }
+.btn-cetak {
+  padding: 11px 16px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border); background: var(--surface);
+  font-size: 13px; font-weight: 700; color: var(--text); cursor: pointer; transition: .15s;
+  white-space: nowrap; font-family: var(--font);
+  text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+}
+.btn-cetak:hover { border-color: #7c3aed; color: #7c3aed; }
 .btn-clear-local {
   padding: 11px 14px; border-radius: var(--radius-sm);
   border: 1.5px solid var(--border); background: var(--surface);
@@ -555,6 +564,7 @@ input[type="file"].fi-file {
       <strong id="counter">0</strong> soal
     </div>
     <div class="bar-actions">
+      <a class="btn-cetak" href="https://castp6980-eng.github.io/penampil_soal_ujian/" target="_blank" rel="noopener noreferrer">🖨 Cetak Soal</a>
       <button class="btn-preview"     onclick="showPreviewModal()">👁 Preview</button>
       <button class="btn-clear-local" onclick="confirmClearLocal()">🗑 Bersihkan</button>
       <button class="btn-kirim" id="btnKirim" onclick="kirimSemuaData()">Kirim ke Server →</button>
