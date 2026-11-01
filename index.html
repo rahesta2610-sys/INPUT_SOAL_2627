@@ -273,10 +273,29 @@ textarea.fi { resize: vertical; min-height: 76px; line-height: 1.55; }
 
 .card-meta-row {
   display: grid;
-  grid-template-columns: auto 80px auto;
+  grid-template-columns: 1fr auto auto;
   gap: 8px; align-items: flex-end;
   margin-bottom: 14px; margin-top: 10px;
 }
+.stepper {
+  display: flex; align-items: stretch;
+  border: 1.5px solid var(--border); border-radius: var(--radius-xs);
+  overflow: hidden; background: var(--surface);
+}
+.step-btn {
+  width: 40px; min-height: 42px; border: none; background: var(--accent-soft);
+  color: var(--accent); font-size: 20px; font-weight: 800;
+  cursor: pointer; font-family: var(--font); transition: .15s;
+}
+.step-btn:active, .step-btn:hover { background: var(--accent); color: #fff; }
+.stepper .jmlPilihan {
+  width: 42px; text-align: center; border: none; outline: none;
+  font-size: 15px; font-weight: 800; font-family: var(--font);
+  color: var(--text); background: var(--surface); padding: 0;
+  -moz-appearance: textfield;
+}
+.stepper .jmlPilihan::-webkit-outer-spin-button,
+.stepper .jmlPilihan::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .btn-hapus {
   padding: 10px 12px; border-radius: var(--radius-xs);
   border: 1.5px solid var(--border); background: var(--surface);
@@ -881,8 +900,11 @@ function buatKartu(nomor, item) {
       '</div>' +
       '<div class="field-group">' +
         '<label>Jml Opsi</label>' +
-        '<input type="number" class="fi jmlPilihan" value="' + (item.jml || 4) + '" min="2" max="12"' +
-               ' oninput="handleJmlOpsiChange(this)">' +
+        '<div class="stepper">' +
+          '<button type="button" class="step-btn" onclick="ubahJmlOpsi(this,-1)" title="Kurangi opsi">−</button>' +
+          '<input type="number" class="jmlPilihan" value="' + (item.jml || 4) + '" min="2" max="12" readonly>' +
+          '<button type="button" class="step-btn" onclick="ubahJmlOpsi(this,1)" title="Tambah opsi">+</button>' +
+        '</div>' +
       '</div>' +
       '<button class="btn-hapus" onclick="hapusSoal(\'' + div.id + '\')">✕ Hapus</button>' +
     '</div>' +
@@ -896,7 +918,7 @@ function buatKartu(nomor, item) {
 
     '<div class="file-section">' +
       '<label>Gambar Soal (opsional)</label>' +
-      '<input type="file" class="fi-file fileSoal" accept="image/*" capture="environment"' +
+      '<input type="file" class="fi-file fileSoal" accept="image/*"' +
              ' onchange="handleFileSoal(this)">' +
       '<div class="img-preview-wrap" style="display:none;margin-top:8px">' +
         '<img class="img-preview-soal" style="max-width:100%;max-height:160px;border-radius:8px;border:1px solid var(--border);display:block">' +
@@ -920,30 +942,50 @@ function buatKartu(nomor, item) {
 }
 
 /* ===== RENDER OPSI ===== */
+function buatOpsiRow(L, cardId, val) {
+  var pid  = 'mfile-' + cardId + '-' + L;
+  var wrap = document.createElement('div');
+  wrap.innerHTML =
+    '<div class="option-row">' +
+      '<div class="opt-label">' + L + '</div>' +
+      '<input type="text" class="opt-input pilihan' + L + '"' +
+             ' value="' + escHtml(val || '') + '"' +
+             ' placeholder="Pilihan jawaban ' + L + '"' +
+             ' oninput="triggerLocalSave()">' +
+      '<input type="file" class="opt-file file' + L + '" data-pid="' + pid + '" accept="image/*"' +
+             ' onchange="handleFileOpsi(this)">' +
+      '<button type="button" class="opt-img-toggle"' +
+              ' onclick="toggleOptFile(this,\'' + pid + '\')" title="Tambah gambar">📎</button>' +
+      '<input type="file" class="opt-file-mobile file' + L + '" id="' + pid + '" data-pid="' + pid + '" accept="image/*"' +
+             ' onchange="handleFileOpsi(this)">' +
+    '</div>';
+  return wrap;
+}
+
 function renderOpsi(wrapperEl, jml, savedPilihan, cardId) {
   wrapperEl.innerHTML = '';
   for (var i = 0; i < jml; i++) {
-    var L      = LABELS[i];
-    var fileId = 'mfile-' + cardId + '-' + L;
-    var wrap   = document.createElement('div');
-
-    wrap.innerHTML =
-      '<div class="option-row">' +
-        '<div class="opt-label">' + L + '</div>' +
-        '<input type="text" class="opt-input pilihan' + L + '"' +
-               ' value="' + escHtml(savedPilihan[i] || '') + '"' +
-               ' placeholder="Pilihan jawaban ' + L + '"' +
-               ' oninput="triggerLocalSave()">' +
-        '<input type="file" class="opt-file file' + L + '" accept="image/*"' +
-               ' onchange="handleFileOpsi(this)">' +
-        '<button type="button" class="opt-img-toggle"' +
-                ' onclick="toggleOptFile(this,\'' + fileId + '\')" title="Tambah gambar">📎</button>' +
-        '<input type="file" class="opt-file-mobile file' + L + '" id="' + fileId + '" accept="image/*" capture="environment"' +
-               ' onchange="handleFileOpsi(this)">' +
-      '</div>';
-
-    wrapperEl.appendChild(wrap);
+    wrapperEl.appendChild(buatOpsiRow(LABELS[i], cardId, savedPilihan[i]));
   }
+}
+
+/* Tambah/kurangi opsi tanpa menghapus isi opsi yang sudah ada */
+function setJmlOpsi(card, n) {
+  var wrapper = card.querySelector('.opsi-wrapper');
+  while (wrapper.children.length > n) wrapper.lastElementChild.remove();
+  while (wrapper.children.length < n) {
+    wrapper.appendChild(buatOpsiRow(LABELS[wrapper.children.length], card.id, ''));
+  }
+  card.querySelector('.jmlPilihan').value = n;
+  triggerLocalSave();
+}
+
+function ubahJmlOpsi(btn, delta) {
+  var card = btn.closest('.soal-card');
+  var next = (parseInt(card.querySelector('.jmlPilihan').value) || 4) + delta;
+  if (next > 12) { toast('warn', 'Maksimal 12 Opsi', ''); return; }
+  if (next < 2)  { toast('warn', 'Minimal 2 Opsi', ''); return; }
+  setJmlOpsi(card, next);
 }
 
 /* ===== HANDLER GAMBAR ===== */
@@ -979,7 +1021,7 @@ function handleFileOpsi(inputEl) {
     inputEl.dataset.b64 = e.target.result;
 
     var optionRow = inputEl.closest('.option-row');
-    var wrapId    = 'opt-prev-' + inputEl.id;
+    var wrapId    = 'opt-prev-' + inputEl.dataset.pid;
     var prev      = document.getElementById(wrapId);
 
     if (!prev) {
@@ -1081,15 +1123,6 @@ function restoreImagePreview(card, item) {
       prev.style.display = 'flex';
     });
   }
-}
-
-function handleJmlOpsiChange(inputEl) {
-  var jml = parseInt(inputEl.value) || 0;
-  if (jml > 12) { toast('warn', 'Maksimal 12 Opsi', ''); jml = 12; inputEl.value = 12; }
-  if (jml < 2)  { jml = 2; inputEl.value = 2; }
-  var card = inputEl.closest('.soal-card');
-  renderOpsi(card.querySelector('.opsi-wrapper'), jml, [], card.id);
-  triggerLocalSave();
 }
 
 /* ===== HAPUS SOAL ===== */
